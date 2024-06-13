@@ -1,0 +1,35 @@
+name: Build Kustomize Manifests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: List directory contents
+        run: ls -R
+
+      - name: Set up Kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Create output directory
+        run: mkdir -p output
+
+      - name: Build dev environment manifests
+        run: |
+          cd myapp/overlays/dev
+          kustomize build . > ../../../output/dev-manifest.yaml
+
+      - name: Build prod environment manifests
+        run: |
+          cd myapp/overlays/prod
+          kustomize build . > ../../../output/prod-manifest.yaml
